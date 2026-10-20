@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f4ef">
+  <title>本声 · 私人录音棚</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='12' fill='%233c5547'/%3E%3Cpath d='M16 18v12m8-19v26m8-19v12' stroke='%23f6f5ee' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/workspace.css">
+  <script src="/static/app.js" defer></script>
+  <script src="/static/video.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#script">跳到文稿编辑</a>
+  <header class="topbar">
+    <a href="/" class="brand" aria-label="本声首页"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><strong>本声</strong><span class="brand-caption">创作工作室</span></a>
+    <div class="top-actions"><span class="local"><i></i>本机运行</span><button class="text-button" id="guide-button">录音指南</button></div>
+  </header>
+  <nav class="workspace-tabs" role="tablist" aria-label="工作台">
+    <button id="tab-studio" role="tab" aria-selected="true" aria-controls="studio-panel"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 10.5v1a6.5 6.5 0 0 0 13 0v-1M12 18v3M8.5 21h7"/></svg><span>录音棚</span></button>
+    <button id="tab-video" role="tab" aria-selected="false" aria-controls="video-panel" tabindex="-1"><svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="m10 9 5 3-5 3Z"/></svg><span>视频制作</span></button>
+  </nav>
+  <main class="workspace">
+    <div id="connection-warning" class="notice" role="status" hidden></div>
+    <div class="studio-grid" id="studio-panel" role="tabpanel" aria-labelledby="tab-studio">
+      <div class="editor-heading-row work-heading"><div><h1 id="editor-heading">录音棚</h1><p class="page-description">从一篇文稿，开始一段好声音。</p></div><span id="draft-status" class="draft-status" role="status">草稿保存在本机</span></div>
+      <aside class="studio-sidebar" aria-label="声音与朗读设置">
+        <section class="voice-panel" aria-labelledby="voice-heading">
+          <div class="section-heading"><h2 id="voice-heading">我的声音</h2><button id="add-voice" class="text-button small" aria-expanded="false" aria-controls="voice-form" hidden>添加声音</button></div>
+          <div id="voice-empty" class="voice-empty"><h3>从一段录音开始</h3><p>留下 10–15 秒自然说话的声音，以后每次配音都可以复用。</p></div>
+          <div id="voice-selected" hidden>
+            <label for="voice-select" class="sr-only">当前声音</label><select id="voice-select"></select>
+            <details class="voice-details"><summary>试听与录音备注 <span id="voice-duration" class="summary-meta"></span></summary><div class="disclosure-body">
+              <audio id="reference-player" controls preload="none" aria-label="试听参考录音"></audio>
+              <p id="voice-warnings" class="hint"></p><p id="saved-transcript" class="saved-transcript"></p>
+            </div></details>
+          </div>
+          <form id="voice-form">
+            <label class="upload-zone" for="voice-file"><span class="upload-icon" aria-hidden="true">↑</span><strong id="upload-label">选择参考录音</strong><span>WAV / MP3 / M4A · 3–60 秒</span><input id="voice-file" type="file" accept=".wav,.mp3,.m4a,.flac,.aac,.ogg,.webm,.aiff,.aif,.mp4"></label>
+            <button type="button" id="record-button" class="record-button"><span class="record-dot"></span><span id="record-label">或直接录一段</span></button>
+            <audio id="upload-player" controls hidden aria-label="试听待保存录音"></audio>
+            <label for="voice-name" class="field-label">声音名称</label><input id="voice-name" maxlength="60" value="我的日常声线" required autocomplete="off">
+            <label for="reference-text" class="field-label">录音备注 <span class="optional">选填</span></label><textarea id="reference-text" rows="3" maxlength="2000" placeholder="例如：自然、放松的日常声线，无需逐字稿。"></textarea>
+            <button type="submit" id="save-voice" class="button secondary full">保存我的声音</button>
+          </form>
+          <details id="recording-guide" class="guide">
+            <summary>怎样录得更像自己？</summary><div class="disclosure-body">
+              <p>找一个安静、少回声的房间，距麦克风约 15–20 厘米。自然说话，录 10–15 秒；避开背景音乐、其他人声和爆音。较长录音会使用开头最多 15 秒。</p>
+              <p>可以朗读下面这段：</p><blockquote>你好，这是我的声音。今天，我想用自然、放松的语气，和你分享一段小小的故事。窗外的阳光刚好，桌上放着一杯温热的茶。我们不用着急，慢慢说就好。</blockquote>
+              <button type="button" id="use-reference-script" class="text-button">保存为录音备注</button><p>自然录音用于保留音色，朗读情绪可单独设置。</p>
+            </div>
+          </details>
+        </section>
+        <details id="delivery-settings" class="delivery-settings" open>
+          <summary><span class="disclosure-title">朗读设置</span><span id="delivery-summary" class="summary-meta">自动语气 · 1.00×</span></summary>
+          <div class="disclosure-body">
+            <label for="emotion-mode" class="field-label">语气方式</label><select id="emotion-mode"><option value="auto">自动理解文稿</option><option value="manual">手动指定情绪</option><option value="reference">跟随参考录音</option></select>
+            <label id="emotion-choice" for="emotion" class="field-label" hidden>情绪<select id="emotion"><option value="calm">平静</option><option value="happy">高兴</option><option value="angry">愤怒</option><option value="sad">悲伤</option><option value="afraid">恐惧</option><option value="disgusted">反感</option><option value="melancholic">低落</option><option value="surprised">惊讶</option></select></label>
+            <label id="emotion-strength-field" for="emotion-strength" class="field-label range-label">情绪强度 <output id="emotion-strength-value">60%</output><input id="emotion-strength" type="range" min="0" max="1" step="0.05" value="0.6"></label>
+            <div id="auto-emotion-options"><details class="context-options"><summary>情绪提示与上下文</summary><div class="disclosure-body">
+              <label class="check-label"><input id="contextual" type="checkbox" checked>结合前后段落判断</label>
+              <label for="direction" class="field-label">情绪提示 <span class="optional">选填</span></label><textarea id="direction" rows="3" maxlength="300" placeholder="例如：先是恐惧，最后松了一口气。"></textarea>
+              <p class="hint">提示不会被念出。支持 8 类情绪；分析后可逐段调整。</p>
+            </div></details></div>
+            <p id="reference-emotion-note" class="hint" hidden>沿用参考录音的表达习惯，适合自然平稳的叙述。</p>
+            <div class="pacing-settings">
+              <label for="speed" class="field-label range-label">语速 <output id="speed-value">1.00×</output><input id="speed" type="range" min="0.75" max="1.3" step="0.05" value="1"></label>
+              <details class="pacing-options"><summary>停顿与语言 <span id="pacing-summary" class="summary-meta">自然 · 中文</span></summary><div class="disclosure-body">
+                <label for="gap" class="field-label">段间留白</label><select id="gap"><option value="0.15">紧凑 · 0.15 秒</option><option value="0.3" selected>自然 · 0.30 秒</option><option value="0.5">舒缓 · 0.50 秒</option><option value="0.8">从容 · 0.80 秒</option></select>
+                <label for="language" class="field-label">语言</label><select id="language"><option value="Chinese">中文</option><option value="English">English</option><option value="auto">自动识别</option></select>
+              </div></details>
+            </div>
+            <details class="advanced"><summary>高级设置</summary><div class="disclosure-body advanced-fields">
+              <label for="segment-length" class="field-label">每段最多字数<input type="number" id="segment-length" min="24" max="160" value="80"></label>
+              <label for="seed" class="field-label">随机种子<input type="number" id="seed" min="0" max="2147480000" value="42"></label>
+              <p class="hint">按标点自动分段，换行处留白稍长。发音不理想时可修改文稿或随机种子。</p>
+            </div></details>
+          </div>
+        </details>
+        <details class="runtime-details"><summary><span>模型与服务</span><span id="runtime-summary" class="summary-meta">正在连接…</span></summary><div class="disclosure-body">
+          <p id="model-status">正在连接本地服务…</p>
+          <label for="model-select" class="field-label">新任务使用</label>
+          <select id="model-select" aria-describedby="model-description"><option value="index-tts-2.5">IndexTTS-2.5</option><option value="qwen3-tts">Qwen3-TTS 0.6B</option></select>
+          <p id="model-description" class="hint">IndexTTS 支持自动语气与逐段情绪控制。</p>
+          <div class="runtime-actions"><button id="switch-model" class="button secondary">切换模型</button><button id="restart-service" class="text-button">重启录音棚</button></div>
+          <button id="unload-engine" class="text-button small" hidden>释放模型内存</button>
+        </div></details>
+      </aside>
+      <div class="work-panel">
+        <section class="editor-panel" aria-labelledby="editor-heading">
+          <div class="paper">
+          <div class="editor-toolbar">
+            <div class="mode-tabs" role="group" aria-label="配音场景"><button data-mode="short" aria-pressed="true">短文朗读</button><button data-mode="long" aria-pressed="false">长文制作</button><button data-mode="video" aria-pressed="false">视频旁白</button></div>
+            <button id="import-text-button" class="text-button small" type="button">导入文稿 <span aria-hidden="true">↑</span></button><input id="text-file" type="file" accept=".txt,.md,text/plain,text/markdown" hidden>
+          </div>
+            <label for="project-title" class="sr-only">作品名称</label><input id="project-title" class="title-input" maxlength="100" placeholder="未命名作品" autocomplete="off">
+            <label for="script" class="sr-only">需要朗读的文稿</label><textarea id="script" maxlength="50000" placeholder="在这里写下文稿，或导入一篇文章。&#10;&#10;保留自然的标点与分段，让声音更有呼吸感。" spellcheck="false"></textarea>
+            <div class="paper-footer"><button id="example-button" class="text-button small">试填示例</button><span><span id="char-count">0</span> / 50,000 字</span></div>
+          <div class="generate-row"><p id="generate-hint">先保存你的声音，再开始第一段配音。</p><div class="generate-actions"><button id="preview-button" class="text-button">预览分段</button><button id="analyze-button" class="button secondary">分析语气</button><button id="generate-button" class="button primary" disabled><span aria-hidden="true">▶</span> 生成配音</button></div></div>
+          </div>
+          <div id="segment-preview" class="segment-preview" hidden><div class="section-heading"><h2 id="preview-title">分段预览</h2><button id="close-preview" class="text-button small">收起</button></div><p id="plan-note" class="hint"></p><ol id="preview-list"></ol></div>
+        </section>
+        <section class="output-panel" aria-labelledby="output-heading">
+          <div class="section-heading"><h2 id="output-heading" tabindex="-1">试听与导出</h2><span class="section-meta">音频与字幕</span></div>
+          <div id="output-empty" class="output-empty"><span class="play-outline" aria-hidden="true">▷</span><p>配音完成后，在这里试听并导出。</p></div>
+          <div id="job-output" hidden>
+            <div class="job-title-row"><div><h3 id="job-title"></h3><p id="job-message" role="status" aria-live="polite"></p></div><span id="job-badge" class="status-badge"></span></div>
+            <progress id="job-progress" max="100" value="0" aria-label="已完成段落"></progress>
+            <div class="job-stats"><span id="job-count"></span><span id="job-time"></span></div>
+            <div id="job-actions"><button id="cancel-job" class="text-button" hidden>停止生成</button><button id="resume-job" class="button secondary" hidden>继续生成</button></div>
+            <div id="finished-output" hidden><audio id="output-player" controls preload="metadata" aria-label="试听生成配音"></audio><div class="download-row"><a id="download-wav" class="button secondary" download>下载 WAV</a><a id="download-mp3" class="button subtle" download>MP3</a><a id="download-srt" class="button subtle" download>SRT 字幕</a><button id="make-video" class="button secondary">制作视频 →</button><a id="download-zip" class="text-button" download>全部打包 ↓</a></div><p class="hint">WAV 适合后期剪辑；SRT 为分段字幕，可在剪辑软件中微调。</p></div>
+          </div>
+        </section>
+        <details id="history-section" class="history" hidden><summary><span class="disclosure-title">最近作品</span><span id="history-count" class="summary-meta"></span></summary><div id="history-list"></div></details>
+      </div>
+    </div>
+    <section id="video-panel" class="video-workspace" role="tabpanel" aria-labelledby="tab-video" hidden>
+      <div class="video-heading work-heading"><div><h1>视频制作</h1><p class="page-description">一张图，一篇文章，一段声音。</p></div><span id="video-draft-status" class="section-meta">设置自动保存在本机</span></div>
+      <div class="video-grid">
+        <div class="video-editor">
+          <section class="video-source">
+            <div class="section-heading"><h2>配音与音乐</h2><label for="video-audio-file" class="text-button small">上传音频</label><input id="video-audio-file" type="file" accept=".wav,.mp3,.m4a,.aac,.flac,.ogg,.aiff,.webm" hidden></div>
+            <label for="video-source" class="field-label">从已有配音开始</label><select id="video-source"><option value="">选择一份已完成的作品</option></select><p class="hint">自动带入标题、正文和朗诵音频。</p>
+            <div class="video-audio-info"><span id="video-audio-name">尚未选择朗诵音频</span><span id="video-audio-duration">—</span></div>
+            <audio id="video-narration-player" controls preload="metadata" aria-label="试听朗诵音频" hidden></audio>
+            <label class="field-label" for="video-music-saved">背景音乐 <span class="optional">选填</span></label>
+            <div class="video-music-row"><select id="video-music-saved"><option value="">不使用背景音乐</option></select><label class="button secondary" for="video-music-file">添加音乐</label><input id="video-music-file" type="file" accept=".wav,.mp3,.m4a,.aac,.flac,.ogg,.aiff,.webm" hidden></div>
+            <div id="video-music-settings" hidden><audio id="video-music-player" controls preload="metadata" aria-label="试听背景音乐"></audio><label class="field-label range-label" for="video-music-volume">音乐音量 <output id="video-music-volume-value">12%</output><input id="video-music-volume" type="range" min="0" max="0.5" step="0.01" value="0.12"></label><p class="hint">自动循环至视频结束，首尾淡入淡出。</p></div>
+          </section>
+          <section class="video-material">
+            <div class="section-heading"><h2>背景图片</h2><span class="section-meta">一图到底</span></div>
+            <label class="video-image-upload" for="video-image-file"><img id="video-image-thumb" alt="当前背景图" hidden><span><strong id="video-image-name">选择你的背景图片</strong><small>JPG / PNG / WebP · 保存后可反复使用</small></span><span class="image-change" aria-hidden="true">↑</span></label>
+            <input type="file" id="video-image-file" accept=".jpg,.jpeg,.png,.webp" class="sr-only">
+            <select id="video-image-saved" aria-label="已保存的背景图片" hidden></select>
+            <details class="video-details"><summary>裁剪与背景明暗</summary><div class="disclosure-body">
+              <label class="field-label range-label" for="video-crop-x">水平位置<input id="video-crop-x" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+              <label class="field-label range-label" for="video-crop-y">垂直位置<input id="video-crop-y" type="range" min="0" max="1" step="0.01" value="0.5"></label>
+              <label class="field-label range-label" for="video-shade">背景压暗 <output id="video-shade-value">25%</output><input id="video-shade" type="range" min="0" max="0.8" step="0.05" value="0.25"></label>
+            </div></details>
+          </section>
+          <section class="video-material">
+            <div class="section-heading"><h2>标题与正文</h2><button id="video-import-text" class="text-button small">导入文稿</button></div>
+            <input id="video-text-file" type="file" accept=".txt,.md" hidden>
+            <div class="video-title-fields"><label class="field-label" for="video-title">标题<input id="video-title" maxlength="100" placeholder="给这篇文章起个名字"></label><label class="field-label" for="video-author">作者<input id="video-author" maxlength="40" value="公明"></label></div>
+            <label class="field-label" for="video-text">滚动正文 <span class="optional">从下向上，匀速呈现</span></label><textarea id="video-text" rows="7" maxlength="50000" placeholder="选择已有配音，正文会自动出现在这里。也可以直接粘贴文章。"></textarea>
+            <div class="video-text-meta"><span id="video-text-match">保留换行，自动排版</span><span id="video-text-count">0 字</span></div>
+            <details class="video-details"><summary>文字样式</summary><div class="disclosure-body video-style-fields">
+              <label class="field-label" for="video-font-size">字号<select id="video-font-size"><option value="38">小 · 38</option><option value="46" selected>标准 · 46</option><option value="56">大 · 56</option><option value="66">特大 · 66</option></select></label>
+              <label class="field-label" for="video-line-spacing">行距<select id="video-line-spacing"><option value="1.4">紧凑</option><option value="1.7" selected>舒展</option><option value="2">宽松</option></select></label>
+              <label class="field-label" for="video-color">文字颜色<select id="video-color"><option value="#f7f3e8">暖白</option><option value="#ffffff">纯白</option><option value="#26342b">墨绿</option></select></label>
+            </div></details>
+          </section>
+        </div>
+        <div class="video-preview-column">
+          <div class="video-preview-sticky">
+            <div class="section-heading"><h2>画面预览</h2><div class="preview-toolbar"><div class="video-aspect-control" role="group" aria-label="视频画幅"><button data-video-aspect="portrait" aria-pressed="true">竖屏 9:16</button><button data-video-aspect="landscape" aria-pressed="false">横屏 16:9</button></div><button id="video-export" class="button primary" disabled>导出视频 <span aria-hidden="true">↗</span></button></div></div>
+            <div class="video-stage"><canvas id="video-canvas" width="1080" height="1920" aria-label="视频画面预览">视频画面预览</canvas><video id="video-result-player" controls preload="metadata" playsinline aria-label="播放导出视频" hidden></video></div>
+            <button id="video-return-preview" class="text-button small" hidden>← 返回编辑预览</button>
+            <div class="video-transport"><button id="video-play" class="video-play" disabled aria-label="播放预览">▶</button><input id="video-seek" type="range" min="0" max="1" value="0" step="0.05" aria-label="预览播放进度" disabled><span id="video-clock">0:00 / 0:00</span></div>
+            <div class="video-timeline-labels"><button id="video-jump-intro" class="text-button small">片头</button><button id="video-jump-body" class="text-button small">正文上滚</button><button id="video-jump-end" class="text-button small">收尾</button></div>
+            <div class="video-timing"><label for="video-intro">片头 <input id="video-intro" type="number" value="4" min="0" max="15" step="0.5"> 秒</label><label for="video-outro">收尾 <input id="video-outro" type="number" value="2" min="0" max="10" step="0.5"> 秒</label><span>1080p · 30 帧</span></div>
+            <p id="video-preview-note" class="hint" role="status">选好背景图、正文和朗诵音频，即可预览。</p>
+            <div class="video-export-row"><div><strong id="video-total-duration">准备你的第一条视频</strong><small>MP4 · 保存在本机</small></div></div>
+            <div id="video-export-status" class="video-export-status" hidden><div class="section-heading"><strong id="video-export-message" role="status"></strong><button id="video-cancel" class="text-button small">停止</button></div><progress id="video-export-progress" max="1" value="0"></progress><div class="video-export-meta"><span id="video-export-percent"></span><span id="video-export-time"></span></div></div>
+          </div>
+        </div>
+      </div>
+      <section id="video-history" class="video-history" hidden><div class="section-heading"><h2>我的视频</h2><span class="section-meta">素材与设置会随作品保留</span></div><div id="video-history-list"></div></section>
+    </section>
+    <footer class="footer"><span>录音、文稿与作品，仅保存在这台 Mac。</span><span>本声 · VOICE STUDIO</span></footer>
+  </main>
+  <div id="toast" class="toast" role="status" hidden><span id="toast-text"></span><button id="toast-close" aria-label="关闭提示">×</button></div>
+  <div id="restart-screen" class="restart-screen" role="status" aria-live="assertive" hidden><span class="restart-wave" aria-hidden="true"><i></i><i></i><i></i></span><strong>正在重启录音棚</strong><small>服务恢复后页面会自动刷新，文稿草稿不会丢失。</small></div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+[project]
+name = "voice-studio"
+version = "0.1.0"
+description = "A private local voice-cloning studio for Apple Silicon"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "mlx-audio==0.5.6",
+  "fastapi>=0.115,<1",
+  "uvicorn>=0.34,<1",
+  "python-multipart>=0.0.22",
+  "soundfile>=0.13,<1",
+  "imageio-ffmpeg>=0.6,<1",
+  "Pillow>=11,<13",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "httpx>=0.28,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
